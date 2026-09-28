@@ -19,6 +19,7 @@
   --dev:#175cd3; --dev-soft:#e7effd;
   --train:#6941c6; --train-soft:#f0ebfb;
   --warn:#a15c07;
+  --ok:#12833a; --part:#d97706; --bad:#c81e1e; --unk:#9aa7b3;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
 }
@@ -28,7 +29,7 @@
     --bg:#0e161d; --surface:#15212b; --surface-2:#1b2935; --ink:#e4ebf0; --muted:#98a8b6; --line:#2a3a47;
     --accent:#4fb6d3; --accent-soft:#16323d;
     --prod:#f97066; --prod-soft:#3a1c1b; --test:#f5b54a; --test-soft:#382a14;
-    --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a;
+    --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a; --ok:#3ccf6e; --part:#f59e0b; --bad:#f87171; --unk:#5d6d7a;
   }
 }
 :root[data-theme="dark"]{
@@ -36,7 +37,7 @@
   --bg:#0e161d; --surface:#15212b; --surface-2:#1b2935; --ink:#e4ebf0; --muted:#98a8b6; --line:#2a3a47;
   --accent:#4fb6d3; --accent-soft:#16323d;
   --prod:#f97066; --prod-soft:#3a1c1b; --test:#f5b54a; --test-soft:#382a14;
-  --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a;
+  --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a; --ok:#3ccf6e; --part:#f59e0b; --bad:#f87171; --unk:#5d6d7a;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
@@ -71,7 +72,7 @@ section{display:flex;flex-direction:column;gap:12px}
 
 /* connection board (mirrors the team's Excel layout) */
 .board-wrap{padding:20px}
-.board{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:110px;row-gap:34px;align-items:center}
+.board{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:160px;row-gap:34px;align-items:center}
 .board>.box{position:relative;z-index:1}
 .b-pcm{grid-area:1/1}.b-fcc{grid-area:2/1}.b-edm{grid-area:1/2/3/3}
 .b-epbh{grid-area:1/3}.b-epbc{grid-area:2/3}.b-epr{grid-area:3/2}.b-arc{grid-area:3/3}
@@ -89,7 +90,7 @@ section{display:flex;flex-direction:column;gap:12px}
 .brow a.sv{font:500 11.5px var(--sans)}
 .brow .none{color:var(--muted);font-size:12px}
 .brow .to-edm{font-size:10.5px;font-weight:600;color:var(--warn)}
-.brow .edm-chip{display:none;font-size:10.5px;color:var(--muted)}
+.brow .edm-chip{display:none;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
 .brow.on{background:var(--accent-soft)}
 .brow.faded{opacity:.35}
 #wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
@@ -97,6 +98,23 @@ section{display:flex;flex-direction:column;gap:12px}
 #wires circle{transition:opacity .12s}
 #wires .off{opacity:.08}
 #wires path.on{stroke-width:3.5;opacity:1}
+#wires path.unk{stroke-dasharray:5 5}
+.wlabel{position:absolute;z-index:2;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;max-width:150px;padding:2px 8px;border-radius:999px;background:var(--surface);border:1.5px solid currentColor;font:600 11px var(--sans);white-space:nowrap;cursor:help;transition:opacity .12s}
+.wlabel span{color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+.wlabel.ok{color:var(--ok)}.wlabel.part{color:var(--part)}.wlabel.bad{color:var(--bad)}
+.wlabel.off{opacity:.15}
+.wlabel .tip{display:none;position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);width:260px;white-space:normal;background:var(--ink);color:var(--bg);font:500 12px/1.45 var(--sans);padding:8px 10px;border-radius:6px;z-index:3;text-align:left}
+.wlabel:hover .tip,.wlabel:focus .tip{display:block}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unk);flex:none}
+.dot.ok{background:var(--ok)}.dot.part{background:var(--part)}.dot.bad{background:var(--bad)}.dot.none{background:transparent;border:1.5px solid var(--unk)}
+.st{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.int-table{min-width:900px}
+.int-table th,.int-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.int-table thead th{background:var(--surface-2);font-size:12px}
+.int-table tbody tr:last-child td{border-bottom:0}
+.int-table .sentence{font-weight:600;min-width:260px}
+.int-table .muted{color:var(--muted)}
+.linechip{display:inline-block;width:26px;height:4px;border-radius:2px;vertical-align:middle}
 .board-note{font-size:12px;color:var(--muted);text-align:center;align-self:start}
 .legend{display:flex;flex-wrap:wrap;gap:14px;padding:0 20px 16px;color:var(--muted);font-size:12.5px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -106,7 +124,8 @@ section{display:flex;flex-direction:column;gap:12px}
   .board>.box{grid-area:auto}
   .b-edm{order:-1}
   #wires{display:none}
-  .brow .edm-chip{display:inline}
+  .brow .edm-chip{display:inline-flex}
+  .wlabel{display:none}
 }
 
 /* matrix */
@@ -182,6 +201,14 @@ tr[hidden]{display:none}
       <div class="board-wrap"><div class="board" id="board"></div></div>
       <div class="legend" id="legend"></div>
     </div>
+  </section>
+
+  <section id="int-sec">
+    <div class="sec-head">
+      <h2>Integration status</h2>
+      <span class="hint">Line color on the diagram comes from this table</span>
+    </div>
+    <div class="panel scroll"><table class="int-table" id="ints"></table></div>
   </section>
 
   <section id="matrix-sec">
@@ -267,6 +294,29 @@ const APPS = [
    }}
 ];
 const EXTRA_SVC = [{label:"EPB (owner unclear)", non:"SVC_EPBADMIN"}];
+
+/* Integration status per EDM link. Key = "<app key>|<app env>".
+   conn: "ok" (🟢 established) | "verify" (🟡 needs verifying) | "none" (⚪ not established)
+   job:  "ok" (🟢 running) | "fail" (🔴 failing) | "none" (⚪ not set up)
+   Line color: green = connection + jobs OK · orange = connection only · red = no connection · grey dashed = not tracked */
+const INTEGRATIONS = {
+  "EPB-H|PROD":  {job_name:"Metadata sync", viewpoint:"EPBCS", conn:"ok",     job:"ok",   notes:""},
+  "EPB-H|TEST":  {job_name:"Metadata sync", viewpoint:"",      conn:"none",   job:"none", notes:"Connection needs to be established"},
+  "EPB-C|TEST":  {job_name:"Metadata sync", viewpoint:"",      conn:"none",   job:"none", notes:"Connection needs to be established"},
+  "EPB-C|DEV":   {job_name:"Metadata sync", viewpoint:"",      conn:"verify", job:"fail", notes:"Connection needs to be verified"}
+};
+const lineStatus = it => !it ? "unk" : it.conn === "none" ? "bad" : (it.conn === "ok" && it.job === "ok") ? "ok" : "part";
+const STATUS_TEXT = {ok:"Connected, jobs running", part:"Connection only", bad:"No connection", unk:"Not tracked yet"};
+const CONN_TEXT = {ok:["ok","Established"], verify:["part","Needs verifying"], none:["none","Not established"]};
+const JOB_TEXT = {ok:["ok","Running"], fail:["bad","Failing"], none:["none","Not set up"]};
+const appByKey = k => APPS.find(a => a.key === k);
+function linkSentence(key){
+  const [ak, env] = key.split("|"), a = appByKey(ak), v = a.envs[env], it = INTEGRATIONS[key];
+  let t = `EDM ${v.edm} to ${appLabel(a)} ${env}`;
+  if (it && it.viewpoint) t += ` is using the ${it.viewpoint} viewpoint (of EDM)`;
+  else if (it) t += ` · ${it.job_name}`;
+  return t;
+}
 const EDM = APPS[0];
 const appLabel = a => a.hub ? a.name : `${a.name} ${a.bu}`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -319,7 +369,7 @@ function boxHTML(a){
     if (!val) val = `<span class="none">${v && v.edm ? "No URL listed" : "—"}</span>`;
     if (v && v.edm) {
       if (v.edm !== e.id) val += `<span class="to-edm">→ EDM ${v.edm}</span>`;
-      val += `<span class="edm-chip">EDM ${v.edm} · ${EDM.envs[v.edm].pod}</span>`;
+      val += `<span class="edm-chip"><i class="dot ${lineStatus(INTEGRATIONS[a.key+"|"+e.id])}"></i>EDM ${v.edm} · ${EDM.envs[v.edm].pod}</span>`;
     }
     const attrs = a.hub ? `data-edm="${e.id}"` : (v && v.edm ? `data-edm="${v.edm}" data-link="${a.key}|${e.id}"` : "");
     return `<div class="brow" data-app="${a.key}" data-env="${e.id}" ${attrs}><span class="tier ${e.id}">${e.label}</span><div class="val">${val}</div></div>`;
@@ -329,8 +379,9 @@ function boxHTML(a){
 function renderFlow(){
   board.innerHTML = APPS.map(boxHTML).join("") + `<svg id="wires" aria-hidden="true"></svg>`;
   document.getElementById("legend").innerHTML =
-    ENVS.map(e => `<span><i style="background:${envColor(e.id)}"></i>EDM ${e.id}</span>`).join("") +
-    `<span>Amber “→ EDM” tag: app tier differs from EDM tier</span><span>ARC has no EDM link</span>`;
+    ["ok","part","bad"].map(k => `<span><i style="background:var(--${k})"></i>${STATUS_TEXT[k]}</span>`).join("") +
+    `<span><i style="background:repeating-linear-gradient(90deg,var(--unk) 0 5px,transparent 5px 10px)"></i>${STATUS_TEXT.unk}</span>` +
+    `<span>Hover a label for details</span><span>ARC has no EDM link</span>`;
   applyEnvFade();
   drawWires();
 }
@@ -356,11 +407,24 @@ function drawWires(){
     if (side === "left") { x1 = E.l; y1 = E.cy + off; x2 = A.r; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
     else if (side === "right") { x1 = E.r; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
     else { x1 = E.l; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const bx = Math.min(x1, x2) - 40 - i*10; d = `M${x1},${y1} C${bx},${y1} ${bx},${y2} ${x2},${y2}`; }
-    const c = envColor(edmId);
-    out += `<g data-link="${r.dataset.link}" data-edm="${edmId}" data-app="${r.dataset.app}"><path d="${d}" style="stroke:${c}"/><circle cx="${x1}" cy="${y1}" r="3.5" style="fill:${c}"/><circle cx="${x2}" cy="${y2}" r="3.5" style="fill:${c}"/></g>`;
+    const st = lineStatus(INTEGRATIONS[r.dataset.link]), c = `var(--${st})`;
+    out += `<g data-link="${r.dataset.link}" data-edm="${edmId}" data-app="${r.dataset.app}"><path class="${st}" d="${d}" style="stroke:${c}"/><circle cx="${x1}" cy="${y1}" r="3.5" style="fill:${c}"/><circle cx="${x2}" cy="${y2}" r="3.5" style="fill:${c}"/></g>`;
   });
   svgW.innerHTML = out;
-  if (envFilter !== "ALL") svgW.querySelectorAll("g").forEach(g => g.classList.toggle("off", g.dataset.edm !== envFilter && !g.dataset.link.endsWith("|"+envFilter)));
+  // text labels at each tracked line's midpoint
+  board.querySelectorAll(".wlabel").forEach(l => l.remove());
+  svgW.querySelectorAll("g").forEach(g => {
+    const it = INTEGRATIONS[g.dataset.link]; if (!it) return;
+    const path = g.querySelector("path"), len = path.getTotalLength(), pt = path.getPointAtLength(len / 2);
+    const st = lineStatus(it), [ck, ct] = CONN_TEXT[it.conn], [jk, jt] = JOB_TEXT[it.job];
+    const el = document.createElement("span");
+    el.className = `wlabel ${st}`; el.tabIndex = 0; el.dataset.link = g.dataset.link; el.dataset.edm = g.dataset.edm;
+    el.style.left = pt.x + "px"; el.style.top = pt.y + "px";
+    el.innerHTML = `<i class="dot ${st}"></i><span>${esc(it.viewpoint ? it.viewpoint + " viewpoint" : it.job_name)}</span>
+      <span class="tip">${esc(linkSentence(g.dataset.link))}<br>Connection: ${ct} · Jobs: ${jt}${it.notes ? "<br>" + esc(it.notes) : ""}</span>`;
+    board.appendChild(el);
+  });
+  if (envFilter !== "ALL") board.querySelectorAll("#wires g,.wlabel").forEach(g => g.classList.toggle("off", g.dataset.edm !== envFilter && !g.dataset.link.endsWith("|"+envFilter)));
 }
 function trace(row){
   const svgW = document.getElementById("wires");
@@ -369,14 +433,16 @@ function trace(row){
   const isHub = row.dataset.app === "EDM", edm = row.dataset.edm, link = row.dataset.link;
   const match = g => isHub ? g.dataset.edm === edm : g.dataset.link === link;
   if (svgW) svgW.querySelectorAll("g").forEach(g => { const on = match(g); g.classList.toggle("off", !on); g.querySelector("path").classList.toggle("on", on); });
+  board.querySelectorAll(".wlabel").forEach(l => l.classList.toggle("off", !match(l)));
   rows.forEach(r => {
     const on = r === row || (isHub ? r.dataset.edm === edm && r.dataset.link : (r.dataset.app === "EDM" && r.dataset.env === edm));
     r.classList.toggle("on", !!on); r.classList.remove("faded");
   });
 }
-board.addEventListener("mouseover", e => trace(e.target.closest(".brow")));
+const rowFor = t => { const l = t.closest(".wlabel"); return l ? board.querySelector(`.brow[data-link="${l.dataset.link}"]`) : t.closest(".brow"); };
+board.addEventListener("mouseover", e => trace(rowFor(e.target)));
 board.addEventListener("mouseleave", () => trace(null));
-board.addEventListener("focusin", e => trace(e.target.closest(".brow")));
+board.addEventListener("focusin", e => trace(rowFor(e.target)));
 let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawWires, 80); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWires);
 
@@ -445,9 +511,20 @@ function renderSvc(){
         .map(r => `<tr><td><b>${esc(r.label)}</b></td><td>${esc(r.bu)}</td>${showProd?`<td>${acct(r.prod)}</td>`:''}${showNon?`<td>${acct(r.non)}</td>`:''}</tr>`).join("") + `</tbody>`;
 }
 
+function renderInts(){
+  const keys = Object.keys(INTEGRATIONS);
+  const pill = ([k, t]) => `<span class="st"><i class="dot ${k}"></i>${t}</span>`;
+  document.getElementById("ints").innerHTML =
+    `<thead><tr><th>Link</th><th>Source</th><th>Target</th><th>Integration / job</th><th>Viewpoint</th><th>Connection</th><th>Jobs</th><th>Line</th><th>Notes</th></tr></thead><tbody>` +
+    keys.map(k => {
+      const [ak, env] = k.split("|"), a = appByKey(ak), v = a.envs[env], it = INTEGRATIONS[k], st = lineStatus(it);
+      return `<tr><td class="sentence">${esc(linkSentence(k))}</td><td>EDM <span class="env ${v.edm}">${v.edm}</span></td><td>${esc(appLabel(a))} <span class="env ${env}">${env}</span></td><td>${esc(it.job_name)}</td><td>${it.viewpoint ? esc(it.viewpoint) : '<span class="muted">Not listed</span>'}</td><td>${pill(CONN_TEXT[it.conn])}</td><td>${pill(JOB_TEXT[it.job])}</td><td><span class="st"><i class="linechip" style="background:var(--${st})"></i>${STATUS_TEXT[st]}</span></td><td class="muted">${esc(it.notes || "—")}</td></tr>`;
+    }).join("") +
+    `<tr><td colspan="9" class="muted">PCM, FCC and EPR links to EDM are not tracked yet, so their lines are grey and dashed. Add them to INTEGRATIONS in the page source to color them.</td></tr></tbody>`;
+}
 function renderAll(){
   chipBox.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.env === envFilter));
-  renderFlow(); renderMatrix(); renderSvc();
+  renderFlow(); renderInts(); renderMatrix(); renderSvc();
 }
 renderAll();
 </script>
