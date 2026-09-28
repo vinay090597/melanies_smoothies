@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>UCSF EPM Environment Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f3f6f8; --surface:#ffffff; --surface-2:#eef2f5; --ink:#13202b; --muted:#566676; --line:#d6dee5;
+  --accent:#0a6a86; --accent-soft:#e1f0f5;
+  --prod:#b42318; --prod-soft:#fdecea;
+  --test:#a15c07; --test-soft:#fdf2e1;
+  --dev:#175cd3; --dev-soft:#e7effd;
+  --train:#6941c6; --train-soft:#f0ebfb;
+  --warn:#a15c07;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e161d; --surface:#15212b; --surface-2:#1b2935; --ink:#e4ebf0; --muted:#98a8b6; --line:#2a3a47;
+    --accent:#4fb6d3; --accent-soft:#16323d;
+    --prod:#f97066; --prod-soft:#3a1c1b; --test:#f5b54a; --test-soft:#382a14;
+    --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e161d; --surface:#15212b; --surface-2:#1b2935; --ink:#e4ebf0; --muted:#98a8b6; --line:#2a3a47;
+  --accent:#4fb6d3; --accent-soft:#16323d;
+  --prod:#f97066; --prod-soft:#3a1c1b; --test:#f5b54a; --test-soft:#382a14;
+  --dev:#6ea5f7; --dev-soft:#172a45; --train:#a78bfa; --train-soft:#2a2144; --warn:#f5b54a;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;padding-block:28px 60px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:18px;font-weight:600}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.sub{color:var(--muted);max-width:68ch;margin:6px 0 0}
+header{display:flex;flex-direction:column;gap:14px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
+.search{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0 10px}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:9px 0;outline:none}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 12px var(--sans);letter-spacing:.03em;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:12px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.hint{color:var(--muted);font-size:12.5px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.scroll{overflow-x:auto}
+
+/* env badges */
+.env{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:2px 7px;white-space:nowrap}
+.env::before{content:"";width:7px;height:7px;border-radius:2px;background:currentColor}
+.env.PROD{color:var(--prod);background:var(--prod-soft)}
+.env.TEST{color:var(--test);background:var(--test-soft)}
+.env.DEV{color:var(--dev);background:var(--dev-soft)}
+.env.TRAIN{color:var(--train);background:var(--train-soft)}
+
+/* flow diagram */
+.flow{padding:16px 12px 8px}
+.flow svg{display:block;width:100%;min-width:620px;height:auto}
+.flow text{font-family:var(--sans);fill:var(--ink)}
+.flow .edge{fill:none;stroke-width:2;opacity:.55;transition:opacity .15s,stroke-width .15s}
+.flow .node rect{fill:var(--surface-2);stroke:var(--line)}
+.flow .node{cursor:pointer;transition:opacity .15s}
+.flow .node .pod{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.flow .dim{opacity:.12}
+.flow .hl.edge{opacity:1;stroke-width:3}
+.flow .hl rect{stroke:var(--ink);stroke-width:1.5}
+.flow .mismatch{fill:var(--warn);font-size:11px;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:4px 16px 14px;color:var(--muted);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* matrix */
+table{border-collapse:collapse;width:100%}
+.matrix{min-width:980px}
+.matrix th,.matrix td{border-bottom:1px solid var(--line);vertical-align:top;text-align:left;padding:12px}
+.matrix thead th{background:var(--surface-2);font-size:12px;position:sticky;top:0}
+.matrix tbody tr:last-child td,.matrix tbody tr:last-child th{border-bottom:0}
+.matrix td+td,.matrix th+th,.matrix th+td{border-left:1px solid var(--line)}
+.app-name{font-size:16px;font-weight:700}
+.bu{font-size:12px;color:var(--muted)}
+.app-cell{width:190px;display:flex;flex-direction:column;gap:6px}
+.hub-tag{align-self:flex-start;font:600 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:2px 6px;border-radius:4px}
+.svc{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.svc div{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.svc code{font-family:var(--mono);font-size:11px;color:var(--ink)}
+.cell{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pod{font-family:var(--mono);font-size:12.5px;font-weight:500}
+.links{display:flex;flex-direction:column;gap:5px}
+.link{display:flex;align-items:center;gap:6px;min-width:0}
+.link a{color:var(--accent);font-weight:600;text-decoration:none;font-size:13px;white-space:nowrap}
+.link a:hover{text-decoration:underline}
+.link .path{font-family:var(--mono);font-size:10.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:5px;font:500 11px var(--sans);padding:2px 7px;cursor:pointer;flex:none}
+.copy:hover{color:var(--ink);border-color:var(--muted)}
+.copy.done{color:var(--accent);border-color:var(--accent)}
+.edm-link{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.edm-link b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.warn{color:var(--warn);font-weight:600;font-size:11.5px}
+.derived{font-size:10.5px;color:var(--warn);border:1px dashed var(--warn);border-radius:4px;padding:0 5px;white-space:nowrap}
+.empty{color:var(--muted);font-size:12.5px}
+.feeds{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+td.sel{background:var(--accent-soft)}
+td.sel,th.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+tr[hidden]{display:none}
+.col-hidden{display:none}
+
+/* service accounts */
+.svc-table{min-width:560px}
+.svc-table th,.svc-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+.svc-table thead th{background:var(--surface-2);font-size:12px}
+.svc-table tbody tr:last-child td{border-bottom:0}
+.acct{display:inline-flex;align-items:center;gap:8px}
+.acct code{font-family:var(--mono);font-size:12.5px}
+.notes{margin:0;padding-left:18px;color:var(--muted);display:flex;flex-direction:column;gap:4px;max-width:80ch}
+.notes code{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Oracle EPM Cloud · us-phoenix-1</div>
+    <h1>UCSF EPM Environment Map</h1>
+    <p class="sub">Every application's pods, web and Smart View URLs, the EDM environment each one is wired to, and the service admin accounts. Hover or tap a box in the flow to trace it; click to jump to its URLs.</p>
+  </header>
+
+  <div class="toolbar">
+    <label class="search" for="q">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search app, BU, pod, URL or SVC account" autocomplete="off">
+    </label>
+    <div class="chips" role="group" aria-label="Environment filter" id="envChips"></div>
+  </div>
+
+  <section id="flow-sec">
+    <div class="sec-head">
+      <h2>EDM connections</h2>
+      <span class="hint">Grouped by EDM environment · amber tag = app tier differs from EDM tier</span>
+    </div>
+    <div class="panel">
+      <div class="flow scroll"><svg id="flow" role="img" aria-label="EDM environment to application environment connections"></svg></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section id="matrix-sec">
+    <div class="sec-head">
+      <h2>URLs by environment</h2>
+      <span class="hint">Scroll sideways on small screens</span>
+    </div>
+    <div class="panel scroll"><table class="matrix" id="matrix"></table></div>
+  </section>
+
+  <section id="svc-sec">
+    <div class="sec-head">
+      <h2>Service admin accounts</h2>
+      <span class="hint">PROD names use <code>_ADMIN</code>; non-prod names use <code>ADMIN</code></span>
+    </div>
+    <div class="panel scroll"><table class="svc-table" id="svc"></table></div>
+    <ul class="notes">
+      <li>Accounts are matched to apps by name. <code>SVC_EPBADMIN</code> (non-prod) has no clear owner, and EPR has no account listed.</li>
+      <li>EDM URLs marked <span class="derived">pattern</span> follow the standard pod URL format; the source sheet had pod names only. Confirm before sharing.</li>
+      <li>PCM, FCC and EPR DEV / TRAIN have no app URL in the sheet; only their EDM link is listed.</li>
+    </ul>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const H = p => `https://${p}-ucsfcloudapps.epm.us-phoenix-1.ocs.oraclecloud.com`;
+const ENVS = [
+  {id:"PROD", label:"PROD"},
+  {id:"TEST", label:"TEST"},
+  {id:"DEV", label:"DEV"},
+  {id:"TRAIN", label:"TRAIN / Campus TEST"}
+];
+const envLabel = id => ENVS.find(e => e.id === id).label;
+
+const APPS = [
+  {key:"EDM", name:"EDM", bu:"Shared", hub:true,
+   svc:{prod:"SVC_EDMCS_ADMIN", non:"SVC_EDMCSADMIN"},
+   envs:{
+     PROD:{pod:"EDMCS", web:H("edmcs")+"/epmcloud", derived:true},
+     TEST:{pod:"EDMCS-TEST", web:H("edmcs-test")+"/epmcloud", derived:true},
+     DEV:{pod:"EPM1-TEST", web:H("epm1-test")+"/epmcloud", derived:true},
+     TRAIN:{pod:"EPM1", web:H("epm1")+"/epmcloud", derived:true}
+   }},
+  {key:"EPB-H", name:"EPB", bu:"Health",
+   svc:{prod:"SVC_EPM_ADMIN", non:"SVC_EPMADMIN"},
+   envs:{
+     PROD:{pod:"EPM", web:H("epm")+"/epmcloud", sv:H("epm")+"/HyperionPlanning/SmartView", edm:"PROD"},
+     TEST:{pod:"EPM-TEST", web:H("epm-test")+"/epmcloud", edm:"TEST"}
+   }},
+  {key:"EPB-C", name:"EPB", bu:"Campus",
+   svc:{prod:"SVC_EPM2_ADMIN", non:"SVC_EPM2ADMIN"},
+   envs:{
+     TEST:{pod:"EPM2-TEST", web:H("epm2-test")+"/epmcloud", sv:H("epm2-test")+"/workspace/SmartViewProviders", edm:"DEV"},
+     DEV:{pod:"EPM2", web:H("epm2")+"/epmcloud", edm:"TRAIN"}
+   }},
+  {key:"PCM", name:"PCM", bu:"Campus",
+   svc:{prod:"SVC_PCM_ADMIN", non:"SVC_PCMADMIN"},
+   envs:{
+     PROD:{pod:"PCM", web:H("pcm")+"/epmcloud", edm:"PROD"},
+     TEST:{pod:"PCM-TEST", web:H("pcm-test")+"/HyperionPlanning", edm:"TEST"},
+     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+   }},
+  {key:"FCC", name:"FCC", bu:"Shared",
+   svc:{prod:"SVC_FCCS_ADMIN", non:"SVC_FCCSADMIN"},
+   envs:{
+     PROD:{pod:"FCCS", web:H("fccs")+"/HyperionPlanning", edm:"PROD"},
+     TEST:{pod:"FCCS-TEST", web:H("fccs-test")+"/HyperionPlanning", edm:"TEST"},
+     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+   }},
+  {key:"EPR", name:"EPR", bu:"Campus", svc:{},
+   envs:{
+     PROD:{pod:"EPR", web:H("epr")+"/epmcloud", edm:"PROD"},
+     TEST:{pod:"EPR-TEST", web:H("epr-test")+"/epmcloud", edm:"TEST"},
+     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+   }},
+  {key:"ARC", name:"ARC", bu:"Campus",
+   svc:{prod:"SVC_ARC_ADMIN", non:"SVC_ARCADMIN"},
+   envs:{
+     PROD:{pod:"ARC", web:H("arc")+"/epmcloud"},
+     TEST:{pod:"ARC-TEST", web:H("arc-test")+"/epmcloud"},
+     TRAIN:{pod:"FCCS1-TEST", web:H("fccs1-test")+"/epmcloud"}
+   }}
+];
+const EXTRA_SVC = [{label:"EPB (owner unclear)", non:"SVC_EPBADMIN"}];
+const EDM = APPS[0];
+const appLabel = a => a.hub ? a.name : `${a.name} ${a.bu}`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let envFilter = "ALL", query = "", selected = null;
+try { envFilter = localStorage.getItem("epm-env") || "ALL"; } catch(e) {}
+
+/* ---------- copy ---------- */
+const toast = document.getElementById("toast");
+let toastT;
+function showToast(msg){ toast.textContent = msg; toast.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(()=>toast.classList.remove("show"), 1600); }
+document.addEventListener("click", e => {
+  const b = e.target.closest(".copy"); if (!b) return;
+  const text = b.dataset.copy;
+  const ok = () => { b.classList.add("done"); b.textContent = "Copied"; showToast("Copied " + (text.length > 48 ? text.slice(0,45)+"…" : text)); setTimeout(()=>{b.classList.remove("done"); b.textContent="Copy";}, 1400); };
+  try {
+    navigator.clipboard.writeText(text).then(ok, () => fallbackCopy(text, ok));
+  } catch(err) { fallbackCopy(text, ok); }
+});
+function fallbackCopy(text, ok){
+  const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select();
+  try { document.execCommand("copy"); ok(); } catch(e) { showToast("Select and copy: " + text); }
+  t.remove();
+}
+const copyBtn = (text, label) => `<button class="copy" type="button" data-copy="${esc(text)}" aria-label="Copy ${esc(label)}">Copy</button>`;
+
+/* ---------- chips ---------- */
+const chipBox = document.getElementById("envChips");
+chipBox.innerHTML = [{id:"ALL", label:"All"}, ...ENVS].map(e => `<button class="chip" type="button" data-env="${e.id}">${e.id === "TRAIN" ? "TRAIN" : e.label}</button>`).join("");
+chipBox.addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  envFilter = b.dataset.env;
+  try { localStorage.setItem("epm-env", envFilter); } catch(err) {}
+  renderAll();
+});
+document.getElementById("q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); renderMatrix(); renderSvc(); });
+
+/* ---------- flow diagram ---------- */
+const svg = document.getElementById("flow");
+const envColor = id => `var(--${id.toLowerCase()})`;
+function renderFlow(){
+  const groups = ENVS.map(env => ({env, targets: APPS.filter(a => !a.hub).flatMap(a => Object.entries(a.envs).filter(([,v]) => v.edm === env.id).map(([appEnv, v]) => ({app:a, appEnv, v})))}));
+  const W = 940, rowH = 30, gap = 22, top = 28;
+  const leftX = 40, leftW = 200, rightX = 560, rightW = 300;
+  let y = top, parts = [], edges = [], lefts = [];
+  groups.forEach(g => {
+    const startY = y;
+    g.targets.forEach(t => { t.y = y; y += rowH; });
+    const endY = y - rowH;
+    g.cy = (startY + endY) / 2 + 12;
+    y += gap;
+  });
+  const Hh = y - gap + 16;
+  svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
+  parts.push(`<text x="${leftX}" y="14" font-size="11" font-weight="600" letter-spacing="1" fill="var(--muted)" style="fill:var(--muted)">EDM (SHARED)</text>`);
+  parts.push(`<text x="${rightX}" y="14" font-size="11" font-weight="600" letter-spacing="1" style="fill:var(--muted)">APPLICATION ENVIRONMENT</text>`);
+  groups.forEach(g => {
+    const e = g.env, pod = EDM.envs[e.id].pod, lh = 48, ly = g.cy - lh/2;
+    const dimL = envFilter !== "ALL" && envFilter !== e.id;
+    g.targets.forEach(t => {
+      const x1 = leftX + leftW, y1 = g.cy, x2 = rightX, y2 = t.y + 12, mx = (x1 + x2)/2;
+      edges.push(`<path class="edge" data-edm="${e.id}" data-app="${t.app.key}" data-cell="${t.app.key}|${t.appEnv}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke="${envColor(e.id)}" style="stroke:${envColor(e.id)}"/>`);
+    });
+    lefts.push(`<g class="node${dimL?' dim':''}" tabindex="0" data-edm="${e.id}" data-cell="EDM|${e.id}" role="button" aria-label="EDM ${e.label}, pod ${pod}">
+      <rect x="${leftX}" y="${ly}" width="${leftW}" height="${lh}" rx="7"/>
+      <rect x="${leftX}" y="${ly}" width="5" height="${lh}" rx="2" style="fill:${envColor(e.id)};stroke:none"/>
+      <text x="${leftX+16}" y="${ly+20}" font-size="13" font-weight="700">EDM ${e.id}</text>
+      <text class="pod" x="${leftX+16}" y="${ly+37}">${pod}</text>
+      <text x="${leftX+leftW-12}" y="${ly+20}" font-size="11" text-anchor="end" style="fill:var(--muted)">${g.targets.length} apps</text>
+    </g>`);
+    g.targets.forEach(t => {
+      const dimR = envFilter !== "ALL" && envFilter !== e.id && envFilter !== t.appEnv;
+      const mismatch = t.appEnv !== e.id;
+      parts.push(`<g class="node${dimR?' dim':''}" tabindex="0" data-edm="${e.id}" data-app="${t.app.key}" data-cell="${t.app.key}|${t.appEnv}" role="button" aria-label="${esc(appLabel(t.app))} ${t.appEnv}, linked to EDM ${e.id}">
+        <rect x="${rightX}" y="${t.y}" width="${rightW}" height="24" rx="5"/>
+        <text x="${rightX+10}" y="${t.y+16}" font-size="12.5" font-weight="600">${esc(appLabel(t.app))}</text>
+        <text x="${rightX+118}" y="${t.y+16}" font-size="11.5" font-weight="600" style="fill:${envColor(t.appEnv)}">${t.appEnv}</text>
+        <text class="pod" x="${rightX+170}" y="${t.y+16}">${t.v.pod || "—"}</text>
+        ${mismatch ? `<text class="mismatch" x="${rightX+rightW+8}" y="${t.y+16}" style="fill:var(--warn)">≠ tier</text>` : ""}
+      </g>`);
+    });
+  });
+  svg.innerHTML = edges.join("") + lefts.join("") + parts.join("");
+  if (envFilter !== "ALL") svg.querySelectorAll(".edge").forEach(p => { if (p.dataset.edm !== envFilter && !p.dataset.cell.endsWith("|"+envFilter)) p.classList.add("dim"); });
+  document.getElementById("legend").innerHTML =
+    ENVS.map(e => `<span><span class="env ${e.id}">${e.id}</span>${e.id === "TRAIN" ? "TRAIN / Campus TEST" : ""}</span>`).join("") +
+    `<span>ARC is not linked to EDM</span>`;
+}
+function highlight(node){
+  const els = svg.querySelectorAll(".edge,.node");
+  if (!node){ renderFlow(); return; }
+  const edm = node.dataset.edm, app = node.dataset.app, cell = node.dataset.cell;
+  els.forEach(el => {
+    let on;
+    if (app) on = el.dataset.cell === cell || (el.classList.contains("node") && !el.dataset.app && el.dataset.edm === edm) || (el.dataset.app === app);
+    else on = el.dataset.edm === edm;
+    el.classList.toggle("hl", !!on && (el.classList.contains("edge") ? (app ? el.dataset.app === app : true) : true));
+    el.classList.toggle("dim", !on);
+  });
+  // when tracing an app, show every tier of that app plus its EDM nodes
+  if (app) {
+    const edms = new Set([...svg.querySelectorAll(`.node[data-app="${app}"]`)].map(n => n.dataset.edm));
+    svg.querySelectorAll(".node:not([data-app])").forEach(n => { const on = edms.has(n.dataset.edm); n.classList.toggle("dim", !on); n.classList.toggle("hl", on); });
+  }
+}
+svg.addEventListener("mouseover", e => { const n = e.target.closest(".node"); if (n) highlight(n); });
+svg.addEventListener("mouseleave", () => highlight(null));
+svg.addEventListener("focusin", e => { const n = e.target.closest(".node"); if (n) highlight(n); });
+svg.addEventListener("click", e => { const n = e.target.closest(".node"); if (n) selectCell(n.dataset.cell); });
+svg.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest(".node")) { e.preventDefault(); selectCell(e.target.closest(".node").dataset.cell); } });
+
+function selectCell(cell){
+  selected = cell;
+  if (envFilter !== "ALL" && !cell.endsWith("|"+envFilter)) { envFilter = "ALL"; renderAll(); } else renderMatrix();
+  const td = document.querySelector(`td[data-cell="${cell}"]`);
+  if (td) td.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center", inline:"center"});
+}
+
+/* ---------- matrix ---------- */
+function linkRow(label, url, derived){
+  const path = url.replace(/^https:\/\/[^/]+/, "");
+  return `<div class="link"><a href="${esc(url)}" target="_blank" rel="noopener">${label} ↗</a>${copyBtn(url, label+" URL")}<span class="path" title="${esc(url)}">${esc(path)}</span>${derived?'<span class="derived" title="Built from the standard pod URL pattern">pattern</span>':''}</div>`;
+}
+function cellHTML(a, envId){
+  const v = a.envs[envId];
+  if (!v) return `<span class="empty">Not provisioned</span>`;
+  let h = "";
+  if (v.pod) h += `<div class="pod">${v.pod}</div>`;
+  if (v.web || v.sv) {
+    h += `<div class="links">`;
+    if (v.web) h += linkRow("Web", v.web, v.derived);
+    if (v.sv) h += linkRow("Smart View", v.sv);
+    else if (!a.hub && a.name === "EPB") h += `<span class="empty">Smart View URL not listed</span>`;
+    h += `</div>`;
+  } else h += `<span class="empty">No app URL listed</span>`;
+  if (v.edm) {
+    const mm = v.edm !== envId;
+    h += `<div class="edm-link">EDM <span class="env ${v.edm}">${v.edm}</span><b>${EDM.envs[v.edm].pod}</b>${mm?'<span class="warn">tier differs</span>':''}</div>`;
+  }
+  if (a.hub) {
+    const fed = APPS.filter(x => !x.hub).flatMap(x => Object.entries(x.envs).filter(([,y]) => y.edm === envId).map(([k]) => `${appLabel(x)} <span class="env ${k}">${k}</span>`));
+    h += `<div class="feeds"><span>Linked to:</span>${fed.map(f=>`<span>${f}</span>`).join("")}</div>`;
+  }
+  return `<div class="cell">${h}</div>`;
+}
+function haystack(a){
+  return [a.name, a.bu, appLabel(a), a.svc.prod, a.svc.non, ...Object.entries(a.envs).flatMap(([k,v]) => [k, v.pod, v.web, v.sv, v.edm && ("edm "+v.edm), v.edm && EDM.envs[v.edm].pod])].filter(Boolean).join(" ").toLowerCase();
+}
+function renderMatrix(){
+  const tbl = document.getElementById("matrix");
+  const cols = ENVS.filter(e => envFilter === "ALL" || e.id === envFilter);
+  let h = `<thead><tr><th>Application</th>${cols.map(e => `<th><span class="env ${e.id}">${e.label}</span></th>`).join("")}</tr></thead><tbody>`;
+  let shown = 0;
+  APPS.forEach(a => {
+    const hide = query && !haystack(a).includes(query);
+    if (!hide) shown++;
+    h += `<tr${hide?" hidden":""}><th scope="row"><div class="app-cell">
+      <span class="app-name">${a.name}</span><span class="bu">BU: ${a.bu}</span>
+      ${a.hub ? '<span class="hub-tag">Metadata hub</span>' : ""}
+      <div class="svc">
+        ${a.svc.prod ? `<div><span class="env PROD">P</span><code>${a.svc.prod}</code></div>` : ""}
+        ${a.svc.non ? `<div><span class="env TEST">NP</span><code>${a.svc.non}</code></div>` : ""}
+        ${!a.svc.prod && !a.svc.non ? `<div>No SVC account listed</div>` : ""}
+      </div></div></th>
+      ${cols.map(e => `<td data-cell="${a.key}|${e.id}" class="${selected === a.key+"|"+e.id ? "sel" : ""}">${cellHTML(a, e.id)}</td>`).join("")}</tr>`;
+  });
+  if (!shown) h += `<tr><td colspan="${cols.length+1}" class="empty">No application matches “${esc(query)}”. Try a pod name like EPM2 or an account like SVC_PCM.</td></tr>`;
+  tbl.innerHTML = h + "</tbody>";
+  tbl.classList.toggle("matrix", true);
+  tbl.style.minWidth = cols.length === 1 ? "520px" : "";
+}
+
+/* ---------- service accounts ---------- */
+function renderSvc(){
+  const rows = [...APPS.map(a => ({label: appLabel(a), bu:a.bu, prod:a.svc.prod, non:a.svc.non})), ...EXTRA_SVC.map(x => ({label:x.label, bu:"—", prod:null, non:x.non}))];
+  const acct = n => n ? `<span class="acct"><code>${n}</code>${copyBtn(n, n)}</span>` : `<span class="empty">—</span>`;
+  const showProd = envFilter === "ALL" || envFilter === "PROD", showNon = envFilter !== "PROD";
+  document.getElementById("svc").innerHTML =
+    `<thead><tr><th>Application</th><th>BU</th>${showProd?'<th><span class="env PROD">EPM PROD</span></th>':''}${showNon?'<th><span class="env TEST">EPM NON PROD</span></th>':''}</tr></thead><tbody>` +
+    rows.filter(r => !query || [r.label,r.bu,r.prod,r.non].join(" ").toLowerCase().includes(query))
+        .map(r => `<tr><td><b>${esc(r.label)}</b></td><td>${esc(r.bu)}</td>${showProd?`<td>${acct(r.prod)}</td>`:''}${showNon?`<td>${acct(r.non)}</td>`:''}</tr>`).join("") + `</tbody>`;
+}
+
+function renderAll(){
+  chipBox.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.env === envFilter));
+  renderFlow(); renderMatrix(); renderSvc();
+}
+renderAll();
+</script>
+
+</body>
+</html>
