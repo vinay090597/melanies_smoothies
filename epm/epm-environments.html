@@ -61,20 +61,45 @@ section{display:flex;flex-direction:column;gap:12px}
 .env.DEV{color:var(--dev);background:var(--dev-soft)}
 .env.TRAIN{color:var(--train);background:var(--train-soft)}
 
-/* flow diagram */
-.flow{padding:16px 12px 8px}
-.flow svg{display:block;width:100%;min-width:620px;height:auto}
-.flow text{font-family:var(--sans);fill:var(--ink)}
-.flow .edge{fill:none;stroke-width:2;opacity:.55;transition:opacity .15s,stroke-width .15s}
-.flow .node rect{fill:var(--surface-2);stroke:var(--line)}
-.flow .node{cursor:pointer;transition:opacity .15s}
-.flow .node .pod{font-family:var(--mono);font-size:11px;fill:var(--muted)}
-.flow .dim{opacity:.12}
-.flow .hl.edge{opacity:1;stroke-width:3}
-.flow .hl rect{stroke:var(--ink);stroke-width:1.5}
-.flow .mismatch{fill:var(--warn);font-size:11px;font-weight:600}
-.legend{display:flex;flex-wrap:wrap;gap:14px;padding:4px 16px 14px;color:var(--muted);font-size:12.5px}
+/* connection board (mirrors the team's Excel layout) */
+.board-wrap{padding:20px}
+.board{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:110px;row-gap:34px;align-items:center}
+.board>.box{position:relative;z-index:1}
+.b-pcm{grid-area:1/1}.b-fcc{grid-area:2/1}.b-edm{grid-area:1/2/3/3}
+.b-epbh{grid-area:1/3}.b-epbc{grid-area:2/3}.b-epr{grid-area:3/2}.b-arc{grid-area:3/3}
+.box{background:var(--surface);border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.b-edm{border-width:2.5px;box-shadow:0 0 0 4px var(--accent-soft)}
+.box-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:7px 10px;background:var(--surface-2);border-bottom:1.5px solid var(--ink)}
+.box-head b{font-size:15px}
+.box-head span{font-size:12px;color:var(--muted)}
+.brow{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:8px;padding:6px 10px;border-top:1px solid var(--line);min-height:36px;transition:background .12s}
+.box-head+.brow{border-top:0}
+.brow .tier{font:600 11px var(--sans);letter-spacing:.05em}
+.brow .tier.PROD{color:var(--prod)}.brow .tier.TEST{color:var(--test)}.brow .tier.DEV{color:var(--dev)}.brow .tier.TRAIN{color:var(--train)}
+.brow .val{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0}
+.brow a{color:var(--accent);font:500 12.5px var(--mono);text-decoration:underline;text-underline-offset:2px}
+.brow a.sv{font:500 11.5px var(--sans)}
+.brow .none{color:var(--muted);font-size:12px}
+.brow .to-edm{font-size:10.5px;font-weight:600;color:var(--warn)}
+.brow .edm-chip{display:none;font-size:10.5px;color:var(--muted)}
+.brow.on{background:var(--accent-soft)}
+.brow.faded{opacity:.35}
+#wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+#wires path{fill:none;stroke-width:2;opacity:.75;transition:opacity .12s,stroke-width .12s}
+#wires circle{transition:opacity .12s}
+#wires .off{opacity:.08}
+#wires path.on{stroke-width:3.5;opacity:1}
+.board-note{font-size:12px;color:var(--muted);text-align:center;align-self:start}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:0 20px 16px;color:var(--muted);font-size:12.5px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:22px;height:3px;border-radius:2px}
+@media (max-width:900px){
+  .board{grid-template-columns:minmax(0,1fr);row-gap:16px}
+  .board>.box{grid-area:auto}
+  .b-edm{order:-1}
+  #wires{display:none}
+  .brow .edm-chip{display:inline}
+}
 
 /* matrix */
 table{border-collapse:collapse;width:100%}
@@ -129,7 +154,7 @@ tr[hidden]{display:none}
   <header>
     <div class="eyebrow">Oracle EPM Cloud · us-phoenix-1</div>
     <h1>UCSF EPM Environment Map</h1>
-    <p class="sub">Every application's pods, web and Smart View URLs, the EDM environment each one is wired to, and the service admin accounts. Hover or tap a box in the flow to trace it; click to jump to its URLs.</p>
+    <p class="sub">Every application's pods, web and Smart View URLs, the EDM environment each one is wired to, and the service admin accounts. Click any pod name to open it; hover a row to trace its EDM link.</p>
   </header>
 
   <div class="toolbar">
@@ -143,10 +168,10 @@ tr[hidden]{display:none}
   <section id="flow-sec">
     <div class="sec-head">
       <h2>EDM connections</h2>
-      <span class="hint">Grouped by EDM environment · amber tag = app tier differs from EDM tier</span>
+      <span class="hint">Click a pod name to open it · hover a row to trace its link to EDM</span>
     </div>
     <div class="panel">
-      <div class="flow scroll"><svg id="flow" role="img" aria-label="EDM environment to application environment connections"></svg></div>
+      <div class="board-wrap"><div class="board" id="board"></div></div>
       <div class="legend" id="legend"></div>
     </div>
   </section>
@@ -271,86 +296,81 @@ chipBox.addEventListener("click", e => {
 });
 document.getElementById("q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); renderMatrix(); renderSvc(); });
 
-/* ---------- flow diagram ---------- */
-const svg = document.getElementById("flow");
+/* ---------- connection board ---------- */
+const board = document.getElementById("board");
+const LAYOUT = {"EDM":"b-edm","PCM":"b-pcm","FCC":"b-fcc","EPB-H":"b-epbh","EPB-C":"b-epbc","EPR":"b-epr","ARC":"b-arc"};
+const SIDE = {"PCM":"left","FCC":"left","EPR":"below","EPB-H":"right","EPB-C":"right"};
 const envColor = id => `var(--${id.toLowerCase()})`;
+function boxHTML(a){
+  const rows = ENVS.map(e => {
+    const v = a.envs[e.id];
+    let val = "";
+    if (v && v.web) val += `<a href="${esc(v.web)}" target="_blank" rel="noopener" title="${esc(v.web)}">${v.pod}</a>`;
+    else if (v && v.pod) val += `<span class="none">${v.pod}</span>`;
+    if (v && v.sv) val += `<a class="sv" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View: ${v.pod}</a>`;
+    if (!val) val = `<span class="none">${v && v.edm ? "No URL listed" : "—"}</span>`;
+    if (v && v.edm) {
+      if (v.edm !== e.id) val += `<span class="to-edm">→ EDM ${v.edm}</span>`;
+      val += `<span class="edm-chip">EDM ${v.edm} · ${EDM.envs[v.edm].pod}</span>`;
+    }
+    const attrs = a.hub ? `data-edm="${e.id}"` : (v && v.edm ? `data-edm="${v.edm}" data-link="${a.key}|${e.id}"` : "");
+    return `<div class="brow" data-app="${a.key}" data-env="${e.id}" ${attrs}><span class="tier ${e.id}">${e.label}</span><div class="val">${val}</div></div>`;
+  }).join("");
+  return `<div class="box ${LAYOUT[a.key]}" data-box="${a.key}"><div class="box-head"><b>${a.name}</b><span>BU: ${a.bu}</span></div>${rows}</div>`;
+}
 function renderFlow(){
-  const groups = ENVS.map(env => ({env, targets: APPS.filter(a => !a.hub).flatMap(a => Object.entries(a.envs).filter(([,v]) => v.edm === env.id).map(([appEnv, v]) => ({app:a, appEnv, v})))}));
-  const W = 940, rowH = 30, gap = 22, top = 28;
-  const leftX = 40, leftW = 200, rightX = 560, rightW = 300;
-  let y = top, parts = [], edges = [], lefts = [];
-  groups.forEach(g => {
-    const startY = y;
-    g.targets.forEach(t => { t.y = y; y += rowH; });
-    const endY = y - rowH;
-    g.cy = (startY + endY) / 2 + 12;
-    y += gap;
-  });
-  const Hh = y - gap + 16;
-  svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
-  parts.push(`<text x="${leftX}" y="14" font-size="11" font-weight="600" letter-spacing="1" fill="var(--muted)" style="fill:var(--muted)">EDM (SHARED)</text>`);
-  parts.push(`<text x="${rightX}" y="14" font-size="11" font-weight="600" letter-spacing="1" style="fill:var(--muted)">APPLICATION ENVIRONMENT</text>`);
-  groups.forEach(g => {
-    const e = g.env, pod = EDM.envs[e.id].pod, lh = 48, ly = g.cy - lh/2;
-    const dimL = envFilter !== "ALL" && envFilter !== e.id;
-    g.targets.forEach(t => {
-      const x1 = leftX + leftW, y1 = g.cy, x2 = rightX, y2 = t.y + 12, mx = (x1 + x2)/2;
-      edges.push(`<path class="edge" data-edm="${e.id}" data-app="${t.app.key}" data-cell="${t.app.key}|${t.appEnv}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke="${envColor(e.id)}" style="stroke:${envColor(e.id)}"/>`);
-    });
-    lefts.push(`<g class="node${dimL?' dim':''}" tabindex="0" data-edm="${e.id}" data-cell="EDM|${e.id}" role="button" aria-label="EDM ${e.label}, pod ${pod}">
-      <rect x="${leftX}" y="${ly}" width="${leftW}" height="${lh}" rx="7"/>
-      <rect x="${leftX}" y="${ly}" width="5" height="${lh}" rx="2" style="fill:${envColor(e.id)};stroke:none"/>
-      <text x="${leftX+16}" y="${ly+20}" font-size="13" font-weight="700">EDM ${e.id}</text>
-      <text class="pod" x="${leftX+16}" y="${ly+37}">${pod}</text>
-      <text x="${leftX+leftW-12}" y="${ly+20}" font-size="11" text-anchor="end" style="fill:var(--muted)">${g.targets.length} apps</text>
-    </g>`);
-    g.targets.forEach(t => {
-      const dimR = envFilter !== "ALL" && envFilter !== e.id && envFilter !== t.appEnv;
-      const mismatch = t.appEnv !== e.id;
-      parts.push(`<g class="node${dimR?' dim':''}" tabindex="0" data-edm="${e.id}" data-app="${t.app.key}" data-cell="${t.app.key}|${t.appEnv}" role="button" aria-label="${esc(appLabel(t.app))} ${t.appEnv}, linked to EDM ${e.id}">
-        <rect x="${rightX}" y="${t.y}" width="${rightW}" height="24" rx="5"/>
-        <text x="${rightX+10}" y="${t.y+16}" font-size="12.5" font-weight="600">${esc(appLabel(t.app))}</text>
-        <text x="${rightX+118}" y="${t.y+16}" font-size="11.5" font-weight="600" style="fill:${envColor(t.appEnv)}">${t.appEnv}</text>
-        <text class="pod" x="${rightX+170}" y="${t.y+16}">${t.v.pod || "—"}</text>
-        ${mismatch ? `<text class="mismatch" x="${rightX+rightW+8}" y="${t.y+16}" style="fill:var(--warn)">≠ tier</text>` : ""}
-      </g>`);
-    });
-  });
-  svg.innerHTML = edges.join("") + lefts.join("") + parts.join("");
-  if (envFilter !== "ALL") svg.querySelectorAll(".edge").forEach(p => { if (p.dataset.edm !== envFilter && !p.dataset.cell.endsWith("|"+envFilter)) p.classList.add("dim"); });
+  board.innerHTML = APPS.map(boxHTML).join("") + `<svg id="wires" aria-hidden="true"></svg>`;
   document.getElementById("legend").innerHTML =
-    ENVS.map(e => `<span><span class="env ${e.id}">${e.id}</span>${e.id === "TRAIN" ? "TRAIN / Campus TEST" : ""}</span>`).join("") +
-    `<span>ARC is not linked to EDM</span>`;
+    ENVS.map(e => `<span><i style="background:${envColor(e.id)}"></i>EDM ${e.id}</span>`).join("") +
+    `<span>Amber “→ EDM” tag: app tier differs from EDM tier</span><span>ARC has no EDM link</span>`;
+  applyEnvFade();
+  drawWires();
 }
-function highlight(node){
-  const els = svg.querySelectorAll(".edge,.node");
-  if (!node){ renderFlow(); return; }
-  const edm = node.dataset.edm, app = node.dataset.app, cell = node.dataset.cell;
-  els.forEach(el => {
-    let on;
-    if (app) on = el.dataset.cell === cell || (el.classList.contains("node") && !el.dataset.app && el.dataset.edm === edm) || (el.dataset.app === app);
-    else on = el.dataset.edm === edm;
-    el.classList.toggle("hl", !!on && (el.classList.contains("edge") ? (app ? el.dataset.app === app : true) : true));
-    el.classList.toggle("dim", !on);
+function applyEnvFade(){
+  board.querySelectorAll(".brow").forEach(r => r.classList.toggle("faded", envFilter !== "ALL" && r.dataset.env !== envFilter && r.dataset.edm !== envFilter));
+}
+function drawWires(){
+  const svgW = document.getElementById("wires");
+  if (!svgW || getComputedStyle(svgW).display === "none") return;
+  const B = board.getBoundingClientRect();
+  const rel = el => { const r = el.getBoundingClientRect(); return {l:r.left-B.left, r:r.right-B.left, t:r.top-B.top, b:r.bottom-B.top, cy:(r.top+r.bottom)/2-B.top}; };
+  const links = [...board.querySelectorAll(".brow[data-link]")];
+  // spread start points on each EDM row side so wires don't stack
+  const count = {}, seen = {};
+  links.forEach(r => { const k = r.dataset.edm + SIDE[r.dataset.app]; count[k] = (count[k]||0) + 1; });
+  let out = "";
+  links.forEach(r => {
+    const side = SIDE[r.dataset.app], edmId = r.dataset.edm, k = edmId + side;
+    const i = seen[k] = (seen[k]||0) + 1;
+    const E = rel(board.querySelector(`.b-edm .brow[data-env="${edmId}"]`)), A = rel(r);
+    const off = (i - (count[k]+1)/2) * 6;
+    let d, x1, y1, x2, y2;
+    if (side === "left") { x1 = E.l; y1 = E.cy + off; x2 = A.r; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
+    else if (side === "right") { x1 = E.r; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
+    else { x1 = E.l; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const bx = Math.min(x1, x2) - 40 - i*10; d = `M${x1},${y1} C${bx},${y1} ${bx},${y2} ${x2},${y2}`; }
+    const c = envColor(edmId);
+    out += `<g data-link="${r.dataset.link}" data-edm="${edmId}" data-app="${r.dataset.app}"><path d="${d}" style="stroke:${c}"/><circle cx="${x1}" cy="${y1}" r="3.5" style="fill:${c}"/><circle cx="${x2}" cy="${y2}" r="3.5" style="fill:${c}"/></g>`;
   });
-  // when tracing an app, show every tier of that app plus its EDM nodes
-  if (app) {
-    const edms = new Set([...svg.querySelectorAll(`.node[data-app="${app}"]`)].map(n => n.dataset.edm));
-    svg.querySelectorAll(".node:not([data-app])").forEach(n => { const on = edms.has(n.dataset.edm); n.classList.toggle("dim", !on); n.classList.toggle("hl", on); });
-  }
+  svgW.innerHTML = out;
+  if (envFilter !== "ALL") svgW.querySelectorAll("g").forEach(g => g.classList.toggle("off", g.dataset.edm !== envFilter && !g.dataset.link.endsWith("|"+envFilter)));
 }
-svg.addEventListener("mouseover", e => { const n = e.target.closest(".node"); if (n) highlight(n); });
-svg.addEventListener("mouseleave", () => highlight(null));
-svg.addEventListener("focusin", e => { const n = e.target.closest(".node"); if (n) highlight(n); });
-svg.addEventListener("click", e => { const n = e.target.closest(".node"); if (n) selectCell(n.dataset.cell); });
-svg.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest(".node")) { e.preventDefault(); selectCell(e.target.closest(".node").dataset.cell); } });
-
-function selectCell(cell){
-  selected = cell;
-  if (envFilter !== "ALL" && !cell.endsWith("|"+envFilter)) { envFilter = "ALL"; renderAll(); } else renderMatrix();
-  const td = document.querySelector(`td[data-cell="${cell}"]`);
-  if (td) td.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"center", inline:"center"});
+function trace(row){
+  const svgW = document.getElementById("wires");
+  const rows = board.querySelectorAll(".brow");
+  if (!row || !row.dataset.edm){ rows.forEach(r => r.classList.remove("on")); applyEnvFade(); if (svgW) drawWires(); return; }
+  const isHub = row.dataset.app === "EDM", edm = row.dataset.edm, link = row.dataset.link;
+  const match = g => isHub ? g.dataset.edm === edm : g.dataset.link === link;
+  if (svgW) svgW.querySelectorAll("g").forEach(g => { const on = match(g); g.classList.toggle("off", !on); g.querySelector("path").classList.toggle("on", on); });
+  rows.forEach(r => {
+    const on = r === row || (isHub ? r.dataset.edm === edm && r.dataset.link : (r.dataset.app === "EDM" && r.dataset.env === edm));
+    r.classList.toggle("on", !!on); r.classList.remove("faded");
+  });
 }
+board.addEventListener("mouseover", e => trace(e.target.closest(".brow")));
+board.addEventListener("mouseleave", () => trace(null));
+board.addEventListener("focusin", e => trace(e.target.closest(".brow")));
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawWires, 80); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWires);
 
 /* ---------- matrix ---------- */
 function linkRow(label, url, derived){
