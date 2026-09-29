@@ -41,9 +41,6 @@ h2{font-size:18px;font-weight:600}
 .sub{color:var(--muted);max-width:68ch;margin:6px 0 0}
 header{display:flex;flex-direction:column;gap:14px}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
-.search{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0 10px}
-.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:9px 0;outline:none}
-.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:600 12px var(--sans);letter-spacing:.03em;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -75,7 +72,7 @@ section{display:flex;flex-direction:column;gap:12px}
 .b-edm{border:1.5px solid var(--accent);box-shadow:0 0 0 5px var(--accent-soft),0 6px 20px rgba(16,32,43,.10)}
 .b-edm .box-head{background:var(--accent-soft)}
 .b-edm .box-head b{color:var(--accent);font-size:17px}
-.brow{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--line);min-height:40px;transition:background .12s,opacity .12s}
+.brow{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--line);min-height:40px;transition:background .12s,opacity .12s}
 .box-head+.brow{border-top:0}
 .brow .tier{font:600 10.5px/1.3 var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .brow .tier.PROD{color:var(--prod)}.brow .tier.TEST{color:var(--test)}.brow .tier.DEV{color:var(--dev)}.brow .tier.TRAIN{color:var(--train)}
@@ -83,6 +80,7 @@ section{display:flex;flex-direction:column;gap:12px}
 .brow a{color:var(--accent);font:500 12.5px var(--mono);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
 .brow a:hover{border-bottom-color:var(--accent)}
 .brow a.sv{font:500 11.5px var(--sans)}
+.brow .br{flex-basis:100%;height:0}
 .brow .none{color:var(--muted);font-size:12px}
 .brow.blank .none{opacity:.6}
 .brow .edm-chip{display:none;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
@@ -118,27 +116,34 @@ section{display:flex;flex-direction:column;gap:12px}
 }
 
 /* URLs by environment */
-table{border-collapse:collapse;width:100%}
-.matrix{table-layout:fixed;min-width:640px}
-.matrix th,.matrix td{border-bottom:1px solid var(--line);vertical-align:middle;text-align:left;padding:9px 12px}
-.matrix thead th{background:var(--surface-2);font-size:12px}
-.matrix .app-col{width:150px}
+table{border-collapse:separate;border-spacing:0;width:100%}
+.matrix{table-layout:fixed;min-width:680px}
+.matrix th,.matrix td{text-align:left;vertical-align:top;padding:14px 16px;border-bottom:1px solid var(--line)}
+.matrix thead th{padding:12px 16px 10px;background:var(--surface);border-bottom:1px solid var(--line);font:600 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.matrix thead th.envh{border-top:3px solid var(--c)}
+.matrix thead th.envh span{color:var(--c)}
+.matrix .app-col{width:170px}
 .matrix tbody tr:last-child td,.matrix tbody tr:last-child th{border-bottom:0}
-.matrix td+td,.matrix th+th,.matrix th+td{border-left:1px solid var(--line)}
-.app-name{font-size:14px;font-weight:700}
-.bu{font-size:11px;font-weight:600;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:1px 8px;margin-left:4px}
-.cell{display:flex;flex-direction:column;gap:4px;min-width:0}
-.cell-links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
-.pod-link{color:var(--accent);font:600 13px var(--mono);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
-.sv-link{color:var(--accent);font:500 12px var(--sans);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-left:6px}
+.matrix tbody tr{transition:background .12s}
+.matrix tbody tr:hover{background:var(--surface-2)}
+.matrix tbody tr.hub{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+.matrix tbody th{vertical-align:middle}
+.app-name{display:block;font-size:15px;font-weight:700;letter-spacing:.01em}
+.bu{display:inline-block;margin-top:3px;font-size:11px;font-weight:600;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:1px 9px}
+.matrix tr.hub .bu{background:var(--surface)}
+.cell{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ln{display:flex;align-items:center;gap:6px;min-width:0}
+.pod-link{color:var(--accent);font:600 13.5px var(--mono);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 30%,transparent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sv-link{color:var(--accent);font:500 12.5px var(--sans);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
 .pod-link:hover,.sv-link:hover{border-bottom-color:var(--accent)}
-.pod{font:600 13px var(--mono)}
-.svc-line{display:flex;align-items:center;gap:6px;min-width:0}
+.sv-ico{color:var(--muted);flex:none}
+.pod{font:600 13.5px var(--mono)}
 .svc-line code{font:11px var(--mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.copy{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px;font:500 10px var(--sans);padding:0 5px;line-height:16px;cursor:pointer;flex:none}
-.copy:hover{color:var(--ink);border-color:var(--muted)}
-.copy.done{color:var(--accent);border-color:var(--accent)}
-.empty{color:var(--muted);font-size:12.5px}
+.copy{display:inline-grid;place-items:center;width:22px;height:22px;border:0;border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;flex:none;opacity:.45;transition:opacity .12s,background .12s}
+.matrix tr:hover .copy,.copy:focus-visible{opacity:1}
+.copy:hover{background:var(--line);color:var(--ink)}
+.copy.done{color:var(--ok);opacity:1}
+.empty{color:var(--muted);opacity:.5}
 tr[hidden]{display:none}
 .notes{margin:0;padding-left:18px;color:var(--muted);display:flex;flex-direction:column;gap:4px;max-width:80ch;font-size:12.5px}
 .notes code{font-family:var(--mono);font-size:11.5px;color:var(--ink)}
@@ -155,11 +160,7 @@ tr[hidden]{display:none}
     <p class="sub">Every application's pods and URLs, how each one connects to EDM, and the service admin account per environment. Click any pod name to open it; hover a line to see its viewpoint and status.</p>
   </header>
 
-  <div class="toolbar">
-    <label class="search" for="q">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Search app, BU, pod, URL or SVC account" autocomplete="off">
-    </label>
+  <div class="toolbar"><span class="hint">Environment</span>
     <div class="chips" role="group" aria-label="Environment filter" id="envChips"></div>
   </div>
 
@@ -196,7 +197,7 @@ const ENVS = [
   {id:"PROD", label:"PROD"},
   {id:"TEST", label:"TEST"},
   {id:"DEV", label:"DEV"},
-  {id:"TRAIN", label:"TRAIN / Campus TEST"}
+  {id:"TRAIN", label:"TRAIN"}
 ];
 const envLabel = id => ENVS.find(e => e.id === id).label;
 
@@ -277,7 +278,7 @@ const EDM = APPS[0];
 const appLabel = a => a.hub ? a.name : `${a.name} ${a.bu}`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-let envFilter = "ALL", query = "", selected = null;
+let envFilter = "ALL";
 try { envFilter = localStorage.getItem("epm-env") || "ALL"; } catch(e) {}
 
 /* ---------- copy ---------- */
@@ -287,7 +288,7 @@ function showToast(msg){ toast.textContent = msg; toast.classList.add("show"); c
 document.addEventListener("click", e => {
   const b = e.target.closest(".copy"); if (!b) return;
   const text = b.dataset.copy;
-  const ok = () => { b.classList.add("done"); b.textContent = "Copied"; showToast("Copied " + (text.length > 48 ? text.slice(0,45)+"…" : text)); setTimeout(()=>{b.classList.remove("done"); b.textContent="Copy";}, 1400); };
+  const ok = () => { b.classList.add("done"); b.innerHTML = CHECK_ICO; showToast("Copied " + (text.length > 48 ? text.slice(0,45)+"…" : text)); setTimeout(()=>{b.classList.remove("done"); b.innerHTML = COPY_ICO;}, 1400); };
   try {
     navigator.clipboard.writeText(text).then(ok, () => fallbackCopy(text, ok));
   } catch(err) { fallbackCopy(text, ok); }
@@ -297,7 +298,9 @@ function fallbackCopy(text, ok){
   try { document.execCommand("copy"); ok(); } catch(e) { showToast("Select and copy: " + text); }
   t.remove();
 }
-const copyBtn = (text, label) => `<button class="copy" type="button" data-copy="${esc(text)}" aria-label="Copy ${esc(label)}">Copy</button>`;
+const COPY_ICO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+const CHECK_ICO = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>';
+const copyBtn = (text, label) => `<button class="copy" type="button" data-copy="${esc(text)}" title="Copy ${esc(label)}" aria-label="Copy ${esc(label)}">${COPY_ICO}</button>`;
 
 /* ---------- chips ---------- */
 const chipBox = document.getElementById("envChips");
@@ -308,7 +311,6 @@ chipBox.addEventListener("click", e => {
   try { localStorage.setItem("epm-env", envFilter); } catch(err) {}
   renderAll();
 });
-document.getElementById("q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); renderMatrix(); });
 
 /* ---------- connection board ---------- */
 const board = document.getElementById("board");
@@ -321,7 +323,7 @@ function boxHTML(a){
     let val = "";
     if (v && v.web) val += `<a href="${esc(v.web)}" target="_blank" rel="noopener" title="${esc(v.web)}">${v.pod}</a>`;
     else if (v && v.pod) val += `<span class="none">${v.pod}</span>`;
-    if (v && v.sv) val += `<a class="sv" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View</a>`;
+    if (v && v.sv) val += `<span class="br"></span><a class="sv" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View</a>`;
     if (!val) val = `<span class="none">${v ? "No URL listed" : "—"}</span>`;
     // a line is drawn only when the app row has a URL and an EDM link
     const linked = !a.hub && v && v.web && v.edm;
@@ -422,28 +424,21 @@ function cellHTML(a, envId){
   const v = a.envs[envId];
   if (!v || (!v.web && !v.pod)) return `<span class="empty">—</span>`;
   let h = v.web
-    ? `<a class="pod-link" href="${esc(v.web)}" target="_blank" rel="noopener" title="${esc(v.web)}">${v.pod}</a>${copyBtn(v.web, v.pod + " URL")}`
-    : `<span class="pod">${v.pod}</span>`;
-  if (v.sv) h += `<a class="sv-link" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View</a>${copyBtn(v.sv, v.pod + " Smart View URL")}`;
+    ? `<div class="ln"><a class="pod-link" href="${esc(v.web)}" target="_blank" rel="noopener" title="${esc(v.web)}">${v.pod}</a>${copyBtn(v.web, v.pod + " URL")}</div>`
+    : `<div class="ln"><span class="pod">${v.pod}</span></div>`;
+  if (v.sv) h += `<div class="ln"><a class="sv-link" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View</a>${copyBtn(v.sv, v.pod + " Smart View URL")}</div>`;
   const svc = svcFor(a, envId);
-  const line2 = svc ? `<div class="svc-line"><code>${svc}</code>${copyBtn(svc, svc)}</div>` : "";
-  return `<div class="cell"><div class="cell-links">${h}</div>${line2}</div>`;
-}
-function haystack(a){
-  return [a.name, a.bu, appLabel(a), a.svc.prod, a.svc.non, ...Object.entries(a.envs).flatMap(([k,v]) => [k, v.pod, v.web, v.sv])].filter(Boolean).join(" ").toLowerCase();
+  if (svc) h += `<div class="ln svc-line"><code>${svc}</code>${copyBtn(svc, svc)}</div>`;
+  return `<div class="cell">${h}</div>`;
 }
 function renderMatrix(){
   const tbl = document.getElementById("matrix");
   const cols = ENVS.filter(e => envFilter === "ALL" || e.id === envFilter);
-  let h = `<thead><tr><th class="app-col">Application</th>${cols.map(e => `<th><span class="env ${e.id}">${e.label}</span></th>`).join("")}</tr></thead><tbody>`;
-  let shown = 0;
+  let h = `<thead><tr><th class="app-col">Application</th>${cols.map(e => `<th class="envh" style="--c:var(--${e.id.toLowerCase()})"><span>${e.label}</span></th>`).join("")}</tr></thead><tbody>`;
   APPS.forEach(a => {
-    const hide = query && !haystack(a).includes(query);
-    if (!hide) shown++;
-    h += `<tr${hide?" hidden":""}><th scope="row"><span class="app-name">${a.name}</span> <span class="bu">${a.bu}</span></th>
+    h += `<tr class="${a.hub ? "hub" : ""}"><th scope="row"><span class="app-name">${a.name}</span><span class="bu">${a.bu}</span></th>
       ${cols.map(e => `<td>${cellHTML(a, e.id)}</td>`).join("")}</tr>`;
   });
-  if (!shown) h += `<tr><td colspan="${cols.length+1}" class="empty">No application matches “${esc(query)}”. Try a pod name like EPM2 or an account like SVC_PCM.</td></tr>`;
   tbl.innerHTML = h + "</tbody>";
 }
 
