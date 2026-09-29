@@ -71,40 +71,44 @@ section{display:flex;flex-direction:column;gap:12px}
 .env.TRAIN{color:var(--train);background:var(--train-soft)}
 
 /* connection board (mirrors the team's Excel layout) */
-.board-wrap{padding:20px}
-.board{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:160px;row-gap:34px;align-items:center}
+.board-wrap{padding:24px;background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:18px 18px;border-radius:10px}
+.board{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:150px;row-gap:30px;align-items:center}
 .board>.box{position:relative;z-index:1}
 .b-pcm{grid-area:1/1}.b-fcc{grid-area:2/1}.b-edm{grid-area:1/2/3/3}
 .b-epbh{grid-area:1/3}.b-epbc{grid-area:2/3}.b-epr{grid-area:3/2}.b-arc{grid-area:3/3}
-.box{background:var(--surface);border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
-.b-edm{border-width:2.5px;box-shadow:0 0 0 4px var(--accent-soft)}
-.box-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:7px 10px;background:var(--surface-2);border-bottom:1.5px solid var(--ink)}
-.box-head b{font-size:15px}
-.box-head span{font-size:12px;color:var(--muted)}
-.brow{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:8px;padding:6px 10px;border-top:1px solid var(--line);min-height:36px;transition:background .12s}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(16,32,43,.06),0 4px 14px rgba(16,32,43,.06)}
+.box-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.box-head b{font-size:15px;letter-spacing:.01em}
+.bu-pill{font-size:11px;font-weight:600;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:2px 9px}
+.b-edm{border:1.5px solid var(--accent);box-shadow:0 0 0 5px var(--accent-soft),0 6px 20px rgba(16,32,43,.10)}
+.b-edm .box-head{background:var(--accent-soft)}
+.b-edm .box-head b{color:var(--accent);font-size:17px}
+.brow{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;gap:8px;padding:7px 12px;border-top:1px solid var(--line);min-height:40px;transition:background .12s,opacity .12s}
 .box-head+.brow{border-top:0}
-.brow .tier{font:600 11px var(--sans);letter-spacing:.05em}
+.brow .tier{font:600 10.5px/1.3 var(--sans);letter-spacing:.06em;text-transform:uppercase}
 .brow .tier.PROD{color:var(--prod)}.brow .tier.TEST{color:var(--test)}.brow .tier.DEV{color:var(--dev)}.brow .tier.TRAIN{color:var(--train)}
-.brow .val{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-width:0}
-.brow a{color:var(--accent);font:500 12.5px var(--mono);text-decoration:underline;text-underline-offset:2px}
+.brow .val{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;min-width:0}
+.brow a{color:var(--accent);font:500 12.5px var(--mono);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.brow a:hover{border-bottom-color:var(--accent)}
 .brow a.sv{font:500 11.5px var(--sans)}
 .brow .none{color:var(--muted);font-size:12px}
-.brow .to-edm{font-size:10.5px;font-weight:600;color:var(--warn)}
+.brow.blank .none{opacity:.6}
 .brow .edm-chip{display:none;align-items:center;gap:5px;font-size:10.5px;color:var(--muted)}
 .brow.on{background:var(--accent-soft)}
 .brow.faded{opacity:.35}
 #wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
-#wires path{fill:none;stroke-width:2;opacity:.75;transition:opacity .12s,stroke-width .12s}
-#wires circle{transition:opacity .12s}
-#wires .off{opacity:.08}
-#wires path.on{stroke-width:3.5;opacity:1}
-#wires path.unk{stroke-dasharray:5 5}
-.wlabel{position:absolute;z-index:2;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;max-width:150px;padding:2px 8px;border-radius:999px;background:var(--surface);border:1.5px solid currentColor;font:600 11px var(--sans);white-space:nowrap;cursor:help;transition:opacity .12s}
-.wlabel span{color:var(--ink);overflow:hidden;text-overflow:ellipsis}
-.wlabel.ok{color:var(--ok)}.wlabel.part{color:var(--part)}.wlabel.bad{color:var(--bad)}
-.wlabel.off{opacity:.15}
-.wlabel .tip{display:none;position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);width:260px;white-space:normal;background:var(--ink);color:var(--bg);font:500 12px/1.45 var(--sans);padding:8px 10px;border-radius:6px;z-index:3;text-align:left}
-.wlabel:hover .tip,.wlabel:focus .tip{display:block}
+#wires .wire{fill:none;stroke-width:1.75;stroke-linecap:round;opacity:.85;transition:opacity .12s,stroke-width .12s}
+#wires .wire.unk{stroke-dasharray:4 5;opacity:.7}
+#wires circle{stroke:var(--surface);stroke-width:1.5;transition:opacity .12s}
+#wires .hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:help}
+#wires g{transition:opacity .12s}
+#wires g.off{opacity:.1}
+#wires g.on .wire{stroke-width:3;opacity:1}
+#wtip{position:absolute;z-index:4;min-width:210px;max-width:280px;background:var(--ink);color:var(--bg);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:none}
+#wtip b{display:block;font-size:12px;margin-bottom:4px;opacity:.8}
+#wtip span{opacity:.7}
+#wtip .dot{width:8px;height:8px;margin-right:5px;vertical-align:0}
+#wtip em{display:block;margin-top:4px;font-style:normal;opacity:.75;font-size:11.5px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--unk);flex:none}
 .dot.ok{background:var(--ok)}.dot.part{background:var(--part)}.dot.bad{background:var(--bad)}.dot.none{background:transparent;border:1.5px solid var(--unk)}
 .st{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
@@ -125,7 +129,6 @@ section{display:flex;flex-direction:column;gap:12px}
   .b-edm{order:-1}
   #wires{display:none}
   .brow .edm-chip{display:inline-flex}
-  .wlabel{display:none}
 }
 
 /* matrix */
@@ -181,7 +184,7 @@ tr[hidden]{display:none}
   <header>
     <div class="eyebrow">Oracle EPM Cloud · us-phoenix-1</div>
     <h1>UCSF EPM Environment Map</h1>
-    <p class="sub">Every application's pods, web and Smart View URLs, the EDM environment each one is wired to, and the service admin accounts. Click any pod name to open it; hover a row to trace its EDM link.</p>
+    <p class="sub">Every application's pods, web and Smart View URLs, the EDM environment each one is wired to, and the service admin accounts. Click any pod name to open it; hover a line to see its viewpoint and status.</p>
   </header>
 
   <div class="toolbar">
@@ -195,7 +198,7 @@ tr[hidden]{display:none}
   <section id="flow-sec">
     <div class="sec-head">
       <h2>EDM connections</h2>
-      <span class="hint">Click a pod name to open it · hover a row to trace its link to EDM</span>
+      <span class="hint">Click a pod name to open it · hover a line for viewpoint and status</span>
     </div>
     <div class="panel">
       <div class="board-wrap"><div class="board" id="board"></div></div>
@@ -228,7 +231,7 @@ tr[hidden]{display:none}
     <ul class="notes">
       <li>Accounts are matched to apps by name. <code>SVC_EPBADMIN</code> (non-prod) has no clear owner, and EPR has no account listed.</li>
       <li>EDM URLs marked <span class="derived">pattern</span> follow the standard pod URL format; the source sheet had pod names only. Confirm before sharing.</li>
-      <li>PCM, FCC and EPR DEV / TRAIN have no app URL in the sheet; only their EDM link is listed.</li>
+      <li>PCM, FCC and EPR DEV / TRAIN have no app URL in the sheet, so no EDM connection is shown for them.</li>
     </ul>
   </section>
 </div>
@@ -270,20 +273,20 @@ const APPS = [
    envs:{
      PROD:{pod:"PCM", web:H("pcm")+"/epmcloud", edm:"PROD"},
      TEST:{pod:"PCM-TEST", web:H("pcm-test")+"/HyperionPlanning", edm:"TEST"},
-     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+     DEV:{}, TRAIN:{}
    }},
   {key:"FCC", name:"FCC", bu:"Shared",
    svc:{prod:"SVC_FCCS_ADMIN", non:"SVC_FCCSADMIN"},
    envs:{
      PROD:{pod:"FCCS", web:H("fccs")+"/HyperionPlanning", edm:"PROD"},
      TEST:{pod:"FCCS-TEST", web:H("fccs-test")+"/HyperionPlanning", edm:"TEST"},
-     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+     DEV:{}, TRAIN:{}
    }},
   {key:"EPR", name:"EPR", bu:"Campus", svc:{},
    envs:{
      PROD:{pod:"EPR", web:H("epr")+"/epmcloud", edm:"PROD"},
      TEST:{pod:"EPR-TEST", web:H("epr-test")+"/epmcloud", edm:"TEST"},
-     DEV:{edm:"DEV"}, TRAIN:{edm:"TRAIN"}
+     DEV:{}, TRAIN:{}
    }},
   {key:"ARC", name:"ARC", bu:"Campus",
    svc:{prod:"SVC_ARC_ADMIN", non:"SVC_ARCADMIN"},
@@ -365,34 +368,29 @@ function boxHTML(a){
     let val = "";
     if (v && v.web) val += `<a href="${esc(v.web)}" target="_blank" rel="noopener" title="${esc(v.web)}">${v.pod}</a>`;
     else if (v && v.pod) val += `<span class="none">${v.pod}</span>`;
-    if (v && v.sv) val += `<a class="sv" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View: ${v.pod}</a>`;
-    if (!val) val = `<span class="none">${v && v.edm ? "No URL listed" : "—"}</span>`;
-    if (v && v.edm) {
-      if (v.edm !== e.id) val += `<span class="to-edm">→ EDM ${v.edm}</span>`;
-      val += `<span class="edm-chip"><i class="dot ${lineStatus(INTEGRATIONS[a.key+"|"+e.id])}"></i>EDM ${v.edm} · ${EDM.envs[v.edm].pod}</span>`;
-    }
-    const attrs = a.hub ? `data-edm="${e.id}"` : (v && v.edm ? `data-edm="${v.edm}" data-link="${a.key}|${e.id}"` : "");
-    return `<div class="brow" data-app="${a.key}" data-env="${e.id}" ${attrs}><span class="tier ${e.id}">${e.label}</span><div class="val">${val}</div></div>`;
+    if (v && v.sv) val += `<a class="sv" href="${esc(v.sv)}" target="_blank" rel="noopener" title="${esc(v.sv)}">Smart View</a>`;
+    if (!val) val = `<span class="none">${v ? "No URL listed" : "—"}</span>`;
+    // a line is drawn only when the app row has a URL and an EDM link
+    const linked = !a.hub && v && v.web && v.edm;
+    if (linked) val += `<span class="edm-chip"><i class="dot ${lineStatus(INTEGRATIONS[a.key+"|"+e.id])}"></i>EDM ${v.edm} · ${EDM.envs[v.edm].pod}</span>`;
+    const attrs = a.hub ? `data-edm="${e.id}"` : (linked ? `data-edm="${v.edm}" data-link="${a.key}|${e.id}"` : "");
+    return `<div class="brow${v ? "" : " blank"}" data-app="${a.key}" data-env="${e.id}" ${attrs}><span class="tier ${e.id}">${e.label}</span><div class="val">${val}</div></div>`;
   }).join("");
-  return `<div class="box ${LAYOUT[a.key]}" data-box="${a.key}"><div class="box-head"><b>${a.name}</b><span>BU: ${a.bu}</span></div>${rows}</div>`;
+  return `<div class="box ${LAYOUT[a.key]}" data-box="${a.key}"><div class="box-head"><b>${a.name}</b><span class="bu-pill">${a.bu}</span></div>${rows}</div>`;
 }
 function renderFlow(){
-  board.innerHTML = APPS.map(boxHTML).join("") + `<svg id="wires" aria-hidden="true"></svg>`;
+  board.innerHTML = APPS.map(boxHTML).join("") + `<svg id="wires" aria-hidden="true"></svg><div id="wtip" role="tooltip" hidden></div>`;
   document.getElementById("legend").innerHTML =
     ["ok","part","bad"].map(k => `<span><i style="background:var(--${k})"></i>${STATUS_TEXT[k]}</span>`).join("") +
     `<span><i style="background:repeating-linear-gradient(90deg,var(--unk) 0 5px,transparent 5px 10px)"></i>${STATUS_TEXT.unk}</span>` +
-    `<span>Hover a label for details</span><span>ARC has no EDM link</span>`;
-  applyEnvFade();
+    `<span>Hover a line for its viewpoint and status</span>`;
   drawWires();
-}
-function applyEnvFade(){
-  board.querySelectorAll(".brow").forEach(r => r.classList.toggle("faded", envFilter !== "ALL" && r.dataset.env !== envFilter && r.dataset.edm !== envFilter));
 }
 function drawWires(){
   const svgW = document.getElementById("wires");
   if (!svgW || getComputedStyle(svgW).display === "none") return;
   const B = board.getBoundingClientRect();
-  const rel = el => { const r = el.getBoundingClientRect(); return {l:r.left-B.left, r:r.right-B.left, t:r.top-B.top, b:r.bottom-B.top, cy:(r.top+r.bottom)/2-B.top}; };
+  const rel = el => { const r = el.getBoundingClientRect(); return {l:r.left-B.left, r:r.right-B.left, cy:(r.top+r.bottom)/2-B.top}; };
   const links = [...board.querySelectorAll(".brow[data-link]")];
   // spread start points on each EDM row side so wires don't stack
   const count = {}, seen = {};
@@ -402,47 +400,66 @@ function drawWires(){
     const side = SIDE[r.dataset.app], edmId = r.dataset.edm, k = edmId + side;
     const i = seen[k] = (seen[k]||0) + 1;
     const E = rel(board.querySelector(`.b-edm .brow[data-env="${edmId}"]`)), A = rel(r);
-    const off = (i - (count[k]+1)/2) * 6;
+    const off = (i - (count[k]+1)/2) * 7;
     let d, x1, y1, x2, y2;
     if (side === "left") { x1 = E.l; y1 = E.cy + off; x2 = A.r; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
     else if (side === "right") { x1 = E.r; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const m = (x1+x2)/2; d = `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; }
-    else { x1 = E.l; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const bx = Math.min(x1, x2) - 40 - i*10; d = `M${x1},${y1} C${bx},${y1} ${bx},${y2} ${x2},${y2}`; }
+    else { x1 = E.l; y1 = E.cy + off; x2 = A.l; y2 = A.cy; const bx = Math.min(x1, x2) - 34 - i*12; d = `M${x1},${y1} C${bx},${y1} ${bx},${y2} ${x2},${y2}`; }
     const st = lineStatus(INTEGRATIONS[r.dataset.link]), c = `var(--${st})`;
-    out += `<g data-link="${r.dataset.link}" data-edm="${edmId}" data-app="${r.dataset.app}"><path class="${st}" d="${d}" style="stroke:${c}"/><circle cx="${x1}" cy="${y1}" r="3.5" style="fill:${c}"/><circle cx="${x2}" cy="${y2}" r="3.5" style="fill:${c}"/></g>`;
+    out += `<g data-link="${r.dataset.link}" data-edm="${edmId}" data-app="${r.dataset.app}">
+      <path class="wire ${st}" d="${d}" style="stroke:${c}"/>
+      <circle cx="${x1}" cy="${y1}" r="3" style="fill:${c}"/><circle cx="${x2}" cy="${y2}" r="3" style="fill:${c}"/>
+      <path class="hit" d="${d}"/></g>`;
   });
   svgW.innerHTML = out;
-  // text labels at each tracked line's midpoint
-  board.querySelectorAll(".wlabel").forEach(l => l.remove());
-  svgW.querySelectorAll("g").forEach(g => {
-    const it = INTEGRATIONS[g.dataset.link]; if (!it) return;
-    const path = g.querySelector("path"), len = path.getTotalLength(), pt = path.getPointAtLength(len / 2);
-    const st = lineStatus(it), [ck, ct] = CONN_TEXT[it.conn], [jk, jt] = JOB_TEXT[it.job];
-    const el = document.createElement("span");
-    el.className = `wlabel ${st}`; el.tabIndex = 0; el.dataset.link = g.dataset.link; el.dataset.edm = g.dataset.edm;
-    el.style.left = pt.x + "px"; el.style.top = pt.y + "px";
-    el.innerHTML = `<i class="dot ${st}"></i><span>${esc(it.viewpoint ? it.viewpoint + " viewpoint" : it.job_name)}</span>
-      <span class="tip">${esc(linkSentence(g.dataset.link))}<br>Connection: ${ct} · Jobs: ${jt}${it.notes ? "<br>" + esc(it.notes) : ""}</span>`;
-    board.appendChild(el);
-  });
-  if (envFilter !== "ALL") board.querySelectorAll("#wires g,.wlabel").forEach(g => g.classList.toggle("off", g.dataset.edm !== envFilter && !g.dataset.link.endsWith("|"+envFilter)));
+  resetTrace();
 }
-function trace(row){
-  const svgW = document.getElementById("wires");
-  const rows = board.querySelectorAll(".brow");
-  if (!row || !row.dataset.edm){ rows.forEach(r => r.classList.remove("on")); applyEnvFade(); if (svgW) drawWires(); return; }
-  const isHub = row.dataset.app === "EDM", edm = row.dataset.edm, link = row.dataset.link;
+function tipHTML(key){
+  const [ak, env] = key.split("|"), a = appByKey(ak), it = INTEGRATIONS[key];
+  const vp = it && it.viewpoint ? esc(it.viewpoint) : "Not listed";
+  const conn = it ? CONN_TEXT[it.conn] : ["unk", "Not tracked"], job = it ? JOB_TEXT[it.job] : ["unk", "Not tracked"];
+  return `<b>EDM ${a.envs[env].edm} → ${esc(appLabel(a))} ${env}</b>
+    <div><span>View Point:</span> ${vp}</div>
+    <div><span>Connection:</span> <i class="dot ${conn[0]}"></i>${conn[1]}</div>
+    <div><span>Jobs:</span> <i class="dot ${job[0]}"></i>${job[1]}</div>
+    ${it && it.notes ? `<em>${esc(it.notes)}</em>` : ""}`;
+}
+function showTip(key, x, y){
+  const tip = document.getElementById("wtip"); if (!tip) return;
+  tip.innerHTML = tipHTML(key); tip.hidden = false;
+  const bw = board.clientWidth, w = tip.offsetWidth;
+  tip.style.left = Math.max(0, Math.min(x + 14, bw - w)) + "px";
+  tip.style.top = (y + 14) + "px";
+}
+function hideTip(){ const tip = document.getElementById("wtip"); if (tip) tip.hidden = true; }
+function resetTrace(){
+  board.querySelectorAll(".brow").forEach(r => { r.classList.remove("on"); r.classList.toggle("faded", envFilter !== "ALL" && r.dataset.env !== envFilter && r.dataset.edm !== envFilter); });
+  board.querySelectorAll("#wires g").forEach(g => { g.classList.remove("on"); g.classList.toggle("off", envFilter !== "ALL" && g.dataset.edm !== envFilter && !g.dataset.link.endsWith("|"+envFilter)); });
+}
+function trace(row, link){
+  if (!row && !link){ resetTrace(); hideTip(); return; }
+  const isHub = row && row.dataset.app === "EDM", edm = row ? row.dataset.edm : null;
+  link = link || (row && row.dataset.link);
+  if (!isHub && !link){ resetTrace(); hideTip(); return; }
   const match = g => isHub ? g.dataset.edm === edm : g.dataset.link === link;
-  if (svgW) svgW.querySelectorAll("g").forEach(g => { const on = match(g); g.classList.toggle("off", !on); g.querySelector("path").classList.toggle("on", on); });
-  board.querySelectorAll(".wlabel").forEach(l => l.classList.toggle("off", !match(l)));
-  rows.forEach(r => {
-    const on = r === row || (isHub ? r.dataset.edm === edm && r.dataset.link : (r.dataset.app === "EDM" && r.dataset.env === edm));
+  board.querySelectorAll("#wires g").forEach(g => { const on = match(g); g.classList.toggle("off", !on); g.classList.toggle("on", on); });
+  const linkRow = link && board.querySelector(`.brow[data-link="${link}"]`), linkEdm = linkRow && linkRow.dataset.edm;
+  board.querySelectorAll(".brow").forEach(r => {
+    const on = isHub ? (r === row || (r.dataset.link && r.dataset.edm === edm)) : (r === linkRow || (r.dataset.app === "EDM" && r.dataset.env === linkEdm));
     r.classList.toggle("on", !!on); r.classList.remove("faded");
   });
 }
-const rowFor = t => { const l = t.closest(".wlabel"); return l ? board.querySelector(`.brow[data-link="${l.dataset.link}"]`) : t.closest(".brow"); };
-board.addEventListener("mouseover", e => trace(rowFor(e.target)));
+board.addEventListener("mousemove", e => {
+  const g = e.target.closest && e.target.closest("#wires g");
+  const B = board.getBoundingClientRect();
+  if (g) { trace(null, g.dataset.link); showTip(g.dataset.link, e.clientX - B.left, e.clientY - B.top); return; }
+  hideTip();
+  const row = e.target.closest(".brow");
+  if (row && row.dataset.edm) trace(row); else trace(null);
+});
 board.addEventListener("mouseleave", () => trace(null));
-board.addEventListener("focusin", e => trace(rowFor(e.target)));
+board.addEventListener("focusin", e => { const row = e.target.closest(".brow"); if (row && row.dataset.edm) trace(row); });
+board.addEventListener("focusout", () => trace(null));
 let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawWires, 80); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWires);
 
@@ -465,7 +482,7 @@ function cellHTML(a, envId){
   } else h += `<span class="empty">No app URL listed</span>`;
   if (v.edm) {
     const mm = v.edm !== envId;
-    h += `<div class="edm-link">EDM <span class="env ${v.edm}">${v.edm}</span><b>${EDM.envs[v.edm].pod}</b>${mm?'<span class="warn">tier differs</span>':''}</div>`;
+    h += `<div class="edm-link">EDM <span class="env ${v.edm}">${v.edm}</span><b>${EDM.envs[v.edm].pod}</b></div>`;
   }
   if (a.hub) {
     const fed = APPS.filter(x => !x.hub).flatMap(x => Object.entries(x.envs).filter(([,y]) => y.edm === envId).map(([k]) => `${appLabel(x)} <span class="env ${k}">${k}</span>`));
@@ -520,7 +537,7 @@ function renderInts(){
       const [ak, env] = k.split("|"), a = appByKey(ak), v = a.envs[env], it = INTEGRATIONS[k], st = lineStatus(it);
       return `<tr><td class="sentence">${esc(linkSentence(k))}</td><td>EDM <span class="env ${v.edm}">${v.edm}</span></td><td>${esc(appLabel(a))} <span class="env ${env}">${env}</span></td><td>${esc(it.job_name)}</td><td>${it.viewpoint ? esc(it.viewpoint) : '<span class="muted">Not listed</span>'}</td><td>${pill(CONN_TEXT[it.conn])}</td><td>${pill(JOB_TEXT[it.job])}</td><td><span class="st"><i class="linechip" style="background:var(--${st})"></i>${STATUS_TEXT[st]}</span></td><td class="muted">${esc(it.notes || "—")}</td></tr>`;
     }).join("") +
-    `<tr><td colspan="9" class="muted">PCM, FCC and EPR links to EDM are not tracked yet, so their lines are grey and dashed. Add them to INTEGRATIONS in the page source to color them.</td></tr></tbody>`;
+    `<tr><td colspan="9" class="muted">PCM, FCC and EPR PROD / TEST links to EDM are not tracked yet, so their lines are grey and dashed. Add them to INTEGRATIONS in the page source to color them.</td></tr></tbody>`;
 }
 function renderAll(){
   chipBox.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.env === envFilter));
